@@ -8,6 +8,7 @@ version="1.0.0"
 displayName="Active Ragdoll Addon"
 authors="galadmitro"
 description="Active ragdoll physics toggle addon."
+logoFile="icon.png"
 
 [[dependencies.activeragdoll]]
     modId="neoforge"
