@@ -6,13 +6,16 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.chat.Component;
 
-import java.lang.reflect.Method;
+import java.io.File;
+import java.util.jar.JarFile;
 
 @Mod(ActiveRagdollAddon.MODID)
 public class ActiveRagdollAddon {
     public static final String MODID = "activeragdoll";
     public static boolean isCollapsed = false;
+    private static boolean scanned = false;
 
     public ActiveRagdollAddon(IEventBus modEventBus) {
         NeoForge.EVENT_BUS.register(this);
@@ -22,29 +25,45 @@ public class ActiveRagdollAddon {
     public void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof Player player) {
             if (player.level().isClientSide()) {
-                updateRagdollState(player);
+                if (!scanned && player.tickCount > 60) {
+                    scanRagdollModToChat(player);
+                    scanned = true;
+                }
             }
         }
     }
 
-    private void updateRagdollState(Player player) {
-        try {
-            Class<?> ragdollClass = Class.forName("dev.leo.ragdollreactions.ragdoll.Ragdoll");
-            Method getMethod = ragdollClass.getMethod("get", Player.class);
-            Object ragdollInstance = getMethod.invoke(null, player);
+    private void scanRagdollModToChat(Player player) {
+        File modsDir = new File("mods");
+        boolean foundClass = false;
+        File[] files = null;
+        
+        if (modsDir.exists() && modsDir.isDirectory()) {
+            files = modsDir.listFiles((dir, name) -> name.endsWith(".jar") && name.toLowerCase().contains("ragdoll_reactions"));
             
-            if (ragdollInstance != null) {
-                Method setPhysics = ragdollInstance.getClass().getMethod("setPhysicsEnabled", boolean.class);
-                setPhysics.invoke(ragdollInstance, true);
-                
-                Method setActive = ragdollInstance.getClass().getMethod("setActiveRagdoll", boolean.class);
-                setActive.invoke(ragdollInstance, !isCollapsed);
+            if (files != null && files.length > 0) {
+                try (JarFile jar = new JarFile(files[0])) {
+                    player.displayClientMessage(Component.literal("§a--- RAGDOLL CLASSES FOUND ---"), false);
+                    for (var entry : jar.stream().toList()) {
+                        String name = entry.getName();
+                        // Filter out Mixins and common bloat to fit in chat
+                        if (name.endsWith(".class") && name.contains("dev/leo/ragdollreactions") && !name.contains("mixin")) {
+                            String cleanName = name.replace("/", ".").replace(".class", "");
+                            player.displayClientMessage(Component.literal("§e" + cleanName), false);
+                            foundClass = true;
+                        }
+                    }
+                    player.displayClientMessage(Component.literal("§a-----------------------------"), false);
+                } catch (Exception e) {
+                    player.displayClientMessage(Component.literal("§cError reading JAR: " + e.getMessage()), false);
+                }
+            } else {
+                player.displayClientMessage(Component.literal("§cCould not find ragdoll_reactions JAR in the mods folder!"), false);
             }
-        } catch (Exception ignored) {
-            player.yBodyRotO = player.yBodyRot;
-            player.yBodyRot = player.getYRot();
-            player.yHeadRotO = player.yHeadRot;
-            player.yHeadRot = player.getYRot();
+        }
+        
+        if (!foundClass && files != null && files.length > 0) {
+            player.displayClientMessage(Component.literal("§cFound the mod file, but failed to find 'dev.leo' classes inside it."), false);
         }
     }
 }
