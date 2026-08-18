@@ -9,6 +9,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 
 @EventBusSubscriber(modid = ActiveRagdollAddon.MOD_ID, value = Dist.CLIENT)
 public class ActiveRagdollHandler {
@@ -21,6 +22,15 @@ public class ActiveRagdollHandler {
 
     public static boolean isEnabled() {
         return enabled;
+    }
+
+    // 1. THIS HIDES YOUR VANILLA PLAYER MODEL WHEN ENABLED
+    @SubscribeEvent
+    public static void onPlayerRender(RenderPlayerEvent.Pre event) {
+        if (enabled && event.getEntity() == Minecraft.getInstance().player) {
+            // Cancels the vanilla rendering so you only see the physics ragdoll
+            event.setCanceled(true); 
+        }
     }
 
     @SubscribeEvent
@@ -72,6 +82,14 @@ public class ActiveRagdollHandler {
         double stiffness = 180.0;
         double damping = 12.0;
 
-        // Applies stiffness and damping to physical ragdoll joints matching extracted model rot angles
+        // 2. THE MISSING LINK: YOU MUST CALL YOUR JAR'S SPECIFIC API HERE
+        // 
+        // Example of what you need to look for in the Ragdoll Reactions API:
+        // RagdollManager.getRagdoll(player).setRightArmTarget(raX, raY, raZ, stiffness, damping);
+        // RagdollManager.getRagdoll(player).setLeftLegTarget(llX, 0, 0, stiffness, damping);
+        
+        // Optional: Uncomment this line temporarily to verify in your IDE console
+        // that the animation angles are successfully being captured while you walk:
+        // System.out.println("Captured Right Arm X Angle: " + raX);
     }
 }
