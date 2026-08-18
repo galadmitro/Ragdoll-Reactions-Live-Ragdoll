@@ -3,10 +3,10 @@ package com.yourname.activeragdoll;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.network.chat.Component;
 
 import java.lang.reflect.Method;
 
@@ -14,42 +14,30 @@ import java.lang.reflect.Method;
 public class ActiveRagdollAddon {
     public static final String MODID = "activeragdoll";
     public static boolean isCollapsed = false;
-    private static boolean loggedMethods = false;
 
     public ActiveRagdollAddon(IEventBus modEventBus) {
+        modEventBus.addListener(this::onClientSetup);
+        modEventBus.addListener(KeyInputHandler::register);
         NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.addListener(KeyInputHandler::handleClientTicks);
+    }
+
+    private void onClientSetup(FMLClientSetupEvent event) {
     }
 
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof Player player) {
             if (player.level().isClientSide()) {
-                if (!loggedMethods && player.tickCount > 60) {
-                    logReactionLauncherMethods(player);
-                    loggedMethods = true;
+                try {
+                    Class<?> clazz = Class.forName("dev.leo.ragdollreactions.physics.ReactionLauncher");
+                    Method resetState = clazz.getMethod("resetState");
+                    if (isCollapsed) {
+                        resetState.invoke(null);
+                    }
+                } catch (Exception ignored) {
                 }
             }
-        }
-    }
-
-    private void logReactionLauncherMethods(Player player) {
-        try {
-            Class<?> clazz = Class.forName("dev.leo.ragdollreactions.physics.ReactionLauncher");
-            player.displayClientMessage(Component.literal("§a--- ReactionLauncher Methods ---"), false);
-            for (Method m : clazz.getDeclaredMethods()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(m.getName()).append("(");
-                Class<?>[] pTypes = m.getParameterTypes();
-                for (int i = 0; i < pTypes.length; i++) {
-                    sb.append(pTypes[i].getSimpleName());
-                    if (i < pTypes.length - 1) sb.append(", ");
-                }
-                sb.append(")");
-                player.displayClientMessage(Component.literal("§e" + sb.toString()), false);
-            }
-            player.displayClientMessage(Component.literal("§a--------------------------------"), false);
-        } catch (Exception e) {
-            player.displayClientMessage(Component.literal("§cError inspecting ReactionLauncher: " + e.getMessage()), false);
         }
     }
 }

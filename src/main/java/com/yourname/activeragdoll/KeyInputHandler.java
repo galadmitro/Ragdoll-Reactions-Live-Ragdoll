@@ -1,16 +1,25 @@
 package com.yourname.activeragdoll;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.InputEvent;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import org.lwjgl.glfw.GLFW;
 
-@EventBusSubscriber(modid = ActiveRagdollAddon.MODID, value = Dist.CLIENT)
 public class KeyInputHandler {
-    
-    @SubscribeEvent
-    public static void onKeyInput(InputEvent.Key event) {
-        while (KeybindManager.FALL_KEY.consumeClick()) {
+    public static final KeyMapping RAGDOLL_KEY = new KeyMapping(
+            "key.activeragdoll.toggle",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_R,
+            "category.activeragdoll"
+    );
+
+    public static void register(RegisterKeyMappingsEvent event) {
+        event.register(RAGDOLL_KEY);
+    }
+
+    public static void handleClientTicks(ClientTickEvent.Post event) {
+        while (RAGDOLL_KEY.consumeClick()) {
             ActiveRagdollAddon.isCollapsed = !ActiveRagdollAddon.isCollapsed;
         }
     }
