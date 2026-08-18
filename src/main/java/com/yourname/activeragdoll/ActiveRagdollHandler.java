@@ -2,6 +2,7 @@ package com.yourname.activeragdoll;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.neoforged.api.distmarker.Dist;
@@ -35,7 +36,7 @@ public class ActiveRagdollHandler {
             return;
         }
 
-        PlayerModel<LocalPlayer> model = renderer.getModel();
+        PlayerModel<AbstractClientPlayer> model = renderer.getModel();
 
         // Extract active joint rotations from vanilla player model frame
         float headX = model.head.xRot;
