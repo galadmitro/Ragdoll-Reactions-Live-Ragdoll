@@ -31,7 +31,6 @@ public class ActiveRagdollAddon {
                     }
                 } else {
                     physicsActive = false;
-                    enforceStandingRagdoll(player);
                 }
             }
         }
@@ -42,18 +41,8 @@ public class ActiveRagdollAddon {
             Class<?> launcherClass = Class.forName("dev.leo.ragdollreactions.physics.ReactionLauncher");
             Method launchMethod = launcherClass.getMethod("launchReaction", Player.class, Vec3.class, float.class);
             launchMethod.invoke(null, player, player.getDeltaMovement(), 1.0f);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            System.err.println("[ActiveRagdoll] Reflection trigger failed: " + e.toString());
         }
-    }
-
-    private void enforceStandingRagdoll(Player player) {
-        Vec3 velocity = player.getDeltaMovement();
-        player.setDeltaMovement(velocity.x, Math.max(velocity.y, -0.05), velocity.z);
-        player.setOnGround(true);
-        
-        player.yBodyRotO = player.yBodyRot;
-        player.yBodyRot = player.getYRot();
-        player.yHeadRotO = player.yHeadRot;
-        player.yHeadRot = player.getYRot();
     }
 }
