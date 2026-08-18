@@ -1,0 +1,34 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "All Rights Reserved. Do not redistribute."
+[[mods]]
+modId = "ragdoll_reactions"
+version = "0.7.0"
+displayName = "Ragdoll Reactions"
+logoFile = "ragdoll_reactions_icon.png"
+authors = "Leonardoinc22"
+description = '''Players and mobs ragdoll in reaction to the world around them! Crashes, explosions, damage, and more send them tumbling.'''
+[[dependencies."ragdoll_reactions"]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.219,)"
+ordering = "NONE"
+side = "BOTH"
+[[dependencies."ragdoll_reactions"]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1]"
+ordering = "NONE"
+side = "BOTH"
+[[dependencies."ragdoll_reactions"]]
+modId = "sable"
+type = "required"
+versionRange = "[1.1.0,)"
+ordering = "AFTER"
+side = "BOTH"
+[[dependencies."ragdoll_reactions"]]
+modId = "sable_player_ragdoll"
+type = "required"
+versionRange = "[0.6.9,)"
+ordering = "AFTER"
+side = "BOTH"
