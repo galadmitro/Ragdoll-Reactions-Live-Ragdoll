@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 public class ActiveRagdollAddon {
     public static final String MODID = "activeragdoll";
     public static boolean isCollapsed = false;
-    private static boolean physicsActive = false;
+    private static Object activeRagdollInstance = null;
 
     public ActiveRagdollAddon(IEventBus modEventBus) {
         NeoForge.EVENT_BUS.register(this);
@@ -24,25 +24,63 @@ public class ActiveRagdollAddon {
     public void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof Player player) {
             if (player.level().isClientSide()) {
-                if (isCollapsed) {
-                    if (!physicsActive) {
-                        triggerRagdoll(player);
-                        physicsActive = true;
-                    }
-                } else {
-                    physicsActive = false;
-                }
+                updateContinuousActiveRagdoll(player);
             }
         }
     }
 
-    private void triggerRagdoll(Player player) {
+    private void updateContinuousActiveRagdoll(Player player) {
+        try {
+            if (activeRagdollInstance == null) {
+                Class<?> managerClass = Class.forName("dev.leo.ragdollreactions.ragdoll.RagdollManager");
+                Method getOrCreate = managerClass.getMethod("getOrCreateRagdoll", Player.class);
+                activeRagdollInstance = getOrCreate.invoke(null, player);
+            }
+
+            if (activeRagdollInstance != null) {
+                Method setKinematic = activeRagdollInstance.getClass().getMethod("setKinematic", boolean.class);
+                Method setSpringTarget = activeRagdollInstance.getClass().getMethod("setSpringTargetPose", Player.class);
+                Method setSpringStrength = activeRagdollInstance.getClass().getMethod("setSpringStrength", float.class);
+
+                if (isCollapsed) {
+                    setKinematic.invoke(activeRagdollInstance, false);
+                    setSpringStrength.invoke(activeRagdollInstance, 0.0f);
+                } else {
+                    setKinematic.invoke(activeRagdollInstance, false);
+                    setSpringStrength.invoke(activeRagdollInstance, 0.85f);
+                    setSpringTarget.invoke(activeRagdollInstance, player);
+                }
+            }
+        } catch (Exception e) {
+            fallbackSpringPhysics(player);
+        }
+    }
+
+    private void fallbackSpringPhysics(Player player) {
         try {
             Class<?> launcherClass = Class.forName("dev.leo.ragdollreactions.physics.ReactionLauncher");
-            Method launchMethod = launcherClass.getMethod("launchReaction", Player.class, Vec3.class, float.class);
-            launchMethod.invoke(null, player, player.getDeltaMovement(), 1.0f);
-        } catch (Exception e) {
-            System.err.println("[ActiveRagdoll] Reflection trigger failed: " + e.toString());
+            if (isCollapsed) {
+                Method launchMethod = launcherClass.getMethod("launchReaction", Player.class, Vec3.class, float.class);
+                launchMethod.invoke(null, player, player.getDeltaMovement(), 1.0f);
+            } else {
+                Method updateMethod = launcherClass.getMethod("keepAlive", Player.class, float.class);
+                updateMethod.invoke(null, player, 0.85f);
+            }
+        } catch (Exception ignored) {
+            applyProceduralRagdollJoints(player);
+        }
+    }
+
+    private void applyProceduralRagdollJoints(Player player) {
+        if (!isCollapsed) {
+            Vec3 vel = player.getDeltaMovement();
+            double speed = Math.sqrt(vel.x * vel.x + vel.z * vel.z);
+            float wobble = (float) Math.sin(player.tickCount * 0.5f) * (float) speed * 0.15f;
+
+            player.yBodyRotO = player.yBodyRot;
+            player.yBodyRot = player.getYRot() + wobble * 12.0f;
+            player.yHeadRotO = player.yHeadRot;
+            player.yHeadRot = player.getYRot();
         }
     }
 }
