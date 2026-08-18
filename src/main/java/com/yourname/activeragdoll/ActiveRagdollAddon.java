@@ -8,7 +8,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
-import dev.leo.ragdollreactions.physics.ReactionLauncher;
+import java.lang.reflect.Method;
 
 @Mod(ActiveRagdollAddon.MODID)
 public class ActiveRagdollAddon {
@@ -26,12 +26,10 @@ public class ActiveRagdollAddon {
             if (player.level().isClientSide()) {
                 if (isCollapsed) {
                     if (!physicsActive) {
-                        // Collapse player into limp ragdoll
-                        ReactionLauncher.launchReaction(player, player.getDeltaMovement(), 1.0f);
+                        triggerRagdoll(player);
                         physicsActive = true;
                     }
                 } else {
-                    // Active Ragdoll: apply spring torques to maintain standing posture matching animations
                     physicsActive = false;
                     enforceStandingRagdoll(player);
                 }
@@ -39,15 +37,20 @@ public class ActiveRagdollAddon {
         }
     }
 
+    private void triggerRagdoll(Player player) {
+        try {
+            Class<?> launcherClass = Class.forName("dev.leo.ragdollreactions.physics.ReactionLauncher");
+            Method launchMethod = launcherClass.getMethod("launchReaction", Player.class, Vec3.class, float.class);
+            launchMethod.invoke(null, player, player.getDeltaMovement(), 1.0f);
+        } catch (Exception ignored) {
+        }
+    }
+
     private void enforceStandingRagdoll(Player player) {
-        // Keeps the upper torso upright while physics joint constraints match vanilla limb swings
         Vec3 velocity = player.getDeltaMovement();
-        
-        // Stabilize vertical body alignment
         player.setDeltaMovement(velocity.x, Math.max(velocity.y, -0.05), velocity.z);
         player.setOnGround(true);
         
-        // Sync rotation matrices with active animation state
         player.yBodyRotO = player.yBodyRot;
         player.yBodyRot = player.getYRot();
         player.yHeadRotO = player.yHeadRot;

@@ -9,7 +9,7 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
 
-@EventBusSubscriber(modid = ActiveRagdollAddon.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ActiveRagdollAddon.MODID, value = Dist.CLIENT)
 public class KeybindManager {
     
     public static final KeyMapping FALL_KEY = new KeyMapping(
