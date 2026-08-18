@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 @Mod(ActiveRagdollAddon.MODID)
 public class ActiveRagdollAddon {
     public static final String MODID = "activeragdoll";
+    public static boolean isCollapsed = false;
     private static boolean loggedMethods = false;
 
     public ActiveRagdollAddon(IEventBus modEventBus) {
