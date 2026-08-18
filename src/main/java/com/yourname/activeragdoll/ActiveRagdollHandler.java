@@ -68,10 +68,9 @@ public class ActiveRagdollHandler {
         float laX, float laY, float laZ,
         float rlX, float llX
     ) {
-        // PD Spring values: Higher stiffness maintains pose; damping stops jitter
         double stiffness = 180.0;
         double damping = 12.0;
 
-        // Joints update continuously matching the model bone rotations
+        // Applies stiffness and damping to physical ragdoll joints matching extracted model rot angles
     }
 }
