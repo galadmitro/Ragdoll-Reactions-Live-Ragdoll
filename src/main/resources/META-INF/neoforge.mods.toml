@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 modLoader="javafml"
 loaderVersion="[1,)"
 license="MIT"
-=======
-modLoader="javafml"
-loaderVersion="[21,)"
-license="MIT"
->>>>>>> b59de1c0ae55de2771b8402525f60c8af17aa831
 
 [[mods]]
 modId="activeragdoll"
@@ -15,45 +9,18 @@ displayName="Active Ragdoll Addon"
 authors="galadmitro"
 description="Active ragdoll physics toggle addon."
 
-<<<<<<< HEAD
 [[dependencies.activeragdoll]]
     modId="neoforge"
     type="required"
-    versionRange="[21.1.0,)"
+    versionRange='[21.1.0,)'
 
 [[dependencies.activeragdoll]]
-=======
-[[dependencies.activeragdoll]]
-    modId="neoforge"
-    type="required"
-    versionRange="[21.1.0,)"
-    ordering="NONE"
-    side="BOTH"
-
-[[dependencies.activeragdoll]]
->>>>>>> b59de1c0ae55de2771b8402525f60c8af17aa831
     modId="minecraft"
     type="required"
-<<<<<<< HEAD
-    versionRange="[1.21.1,)"
-=======
-    versionRange="[1.21.1,)"
-    ordering="NONE"
-    side="BOTH"
->>>>>>> b59de1c0ae55de2771b8402525f60c8af17aa831
+    versionRange='[1.21.1,)'
 
-<<<<<<< HEAD
 [[dependencies.activeragdoll]]
     modId="ragdoll_reactions"
     type="required"
-    versionRange="[0.7.0,)"
+    versionRange='[0.7.0,)'
     ordering="AFTER"
-=======
-[[dependencies.activeragdoll]]
-    modId="ragdoll_reactions"
-    type="required"
-    versionRange="[0.7.0,)"
-    ordering="AFTER"
-    side="BOTH"
-
->>>>>>> b59de1c0ae55de2771b8402525f60c8af17aa831
