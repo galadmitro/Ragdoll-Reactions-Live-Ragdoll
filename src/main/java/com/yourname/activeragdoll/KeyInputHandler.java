@@ -1,26 +1,34 @@
 package com.yourname.activeragdoll;
 
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.KeyMapping;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.InputEvent;
 
+@EventBusSubscriber(modid = ActiveRagdollAddon.MOD_ID, value = Dist.CLIENT)
 public class KeyInputHandler {
-    public static final KeyMapping RAGDOLL_KEY = new KeyMapping(
-            "key.activeragdoll.toggle",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_R,
-            "category.activeragdoll"
-    );
 
-    public static void register(RegisterKeyMappingsEvent event) {
-        event.register(RAGDOLL_KEY);
+    private static boolean active = true;
+
+    @SubscribeEvent
+    public static void onKeyInput(InputEvent.Key event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        while (KeybindManager.TOGGLE_RAGDOLL_KEY.consumeClick()) {
+            active = !active;
+            ActiveRagdollHandler.setEnabled(active);
+            
+            mc.player.displayClientMessage(
+                Component.literal("Active Ragdoll: " + (active ? "§aENABLED" : "§cDISABLED")), 
+                true
+            );
+        }
     }
 
-    public static void handleClientTicks(ClientTickEvent.Post event) {
-        while (RAGDOLL_KEY.consumeClick()) {
-            ActiveRagdollAddon.isCollapsed = !ActiveRagdollAddon.isCollapsed;
-        }
+    public static boolean isActive() {
+        return active;
     }
 }

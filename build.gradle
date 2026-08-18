@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'idea'
-    id 'net.neoforged.moddev' version '2.0.5-beta'
+    id 'net.neoforged.moddev' version '1.0.14'
 }
 
 version = '1.0.0'
@@ -11,7 +11,7 @@ group = 'com.yourname.activeragdoll'
 repositories {
     mavenCentral()
     flatDir {
-        dirs 'libs'
+        dir 'libs'
     }
 }
 
@@ -19,21 +19,25 @@ base {
     archivesName = 'activeragdoll'
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 neoForge {
-    version = '21.1.84'
+    version = '21.1.65'
+
+    parchment {
+        mappingsVersion = '2024.07.28'
+        minecraftVersion = '1.21.1'
+    }
 
     runs {
         client {
             client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'activeragdoll'
         }
         server {
             server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'activeragdoll'
         }
     }
 
